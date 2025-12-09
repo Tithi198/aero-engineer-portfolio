@@ -1186,6 +1186,7 @@ nav ul li a:hover {
     position: relative;
     z-index: 2;
     margin-bottom: 1rem;
+    text-align: center;
 }
 
 .achievement-item p {

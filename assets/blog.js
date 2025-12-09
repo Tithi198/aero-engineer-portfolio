@@ -131,6 +131,51 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+
+    
+    // Smooth scroll to section on page load if hash exists
+window.addEventListener('DOMContentLoaded', function() {
+    // Check if there's a hash in the URL
+    if (window.location.hash) {
+        // Remove the # from the hash
+        const targetId = window.location.hash.substring(1);
+        const targetElement = document.getElementById(targetId);
+        
+        if (targetElement) {
+            // Small delay to ensure page is fully loaded
+            setTimeout(function() {
+                targetElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 100);
+        }
+    }
+});
+
+// Optional: Add smooth scrolling for all anchor links within the same page
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1);
+        const targetElement = document.getElementById(targetId);
+        
+        if (targetElement) {
+            targetElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
     // Initialize blog articles if present
     if (document.querySelector('.blog-article')) {
         handleBlogArticles();
