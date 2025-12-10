@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Mobile Menu Toggle
+    // ============================================
+    // MOBILE MENU TOGGLE
+    // ============================================
     const menuToggle = document.getElementById('menu-toggle');
     const navMenu = document.getElementById('nav-menu');
     
@@ -19,7 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Back to Top Button
+    // ============================================
+    // BACK TO TOP BUTTON
+    // ============================================
     const backToTopButton = document.getElementById('back-to-top');
     if (backToTopButton) {
         window.addEventListener('scroll', function() {
@@ -38,7 +42,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Category Observer for animations
+    // ============================================
+    // CATEGORY OBSERVER FOR ANIMATIONS
+    // ============================================
     const categories = document.querySelectorAll('.category-1, .category-2, .category-3');
     if (categories.length > 0) {
         const observer = new IntersectionObserver((entries) => {
@@ -54,15 +60,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Project Navigation Handler
+    // ============================================
+    // PROJECT NAVIGATION SCROLL HANDLER
+    // ============================================
     function handleProjectNavigation() {
         const hash = window.location.hash.substring(1);
         if (!hash) return;
 
+        // If real ID exists, do NOT override (prevents wrong scroll)
+        if (document.getElementById(hash)) {
+            return;
+        }
+
         const categoryMap = {
-            'blackbox': '.category-1',
-            'rc-aircraft': '.category-2',
-            'quadcopter': '.category-3'
+            'Maintenance': '.category-1',
+            'Safety': '.category-2',
+            'Technical': '.category-3'
         };
 
         const targetSelector = categoryMap[hash];
@@ -71,42 +84,30 @@ document.addEventListener('DOMContentLoaded', function() {
         const targetSection = document.querySelector(targetSelector);
         if (!targetSection) return;
 
-        // Calculate position with more accurate offset
         const headerHeight = document.querySelector('header').offsetHeight;
-        const scrollPosition = targetSection.offsetTop - headerHeight - 20;
+        let scrollPosition = targetSection.offsetTop - headerHeight - 20;
 
-        // Smooth scroll with additional checks
-        if ('scrollBehavior' in document.documentElement.style) {
-            window.scrollTo({
-                top: Math.max(0, scrollPosition),
-                behavior: 'smooth'
-            });
-        } else {
-            // Fallback for older browsers
-            window.scrollTo(0, Math.max(0, scrollPosition));
-        }
+        if (scrollPosition < 0) scrollPosition = 0;
 
-        // Enhanced highlight effect
+        window.scrollTo({
+            top: scrollPosition,
+            behavior: 'smooth'
+        });
+
         targetSection.style.boxShadow = '0 0 20px rgba(102, 126, 234, 0.5)';
         targetSection.style.transition = 'box-shadow 0.5s ease';
         
         setTimeout(() => {
             targetSection.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.08)';
         }, 3000);
-
-        // Add URL history entry without scrolling again
-        if (history.replaceState) {
-            history.replaceState(null, null, `#${hash}`);
-        }
     }
 
-    // Initialize navigation when page loads
-    setTimeout(handleProjectNavigation, 100); // Small delay to ensure DOM is ready
-    
-    // Also handle hash changes if user navigates using browser back/forward
+    setTimeout(handleProjectNavigation, 100);
     window.addEventListener('hashchange', handleProjectNavigation);
 
-    // Blog Article Handling (for future use)
+    // ============================================
+    // BLOG ARTICLE FILTER HANDLER
+    // ============================================
     const handleBlogArticles = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const category = urlParams.get('category');
@@ -118,63 +119,80 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (articles.length > 0 && navLinks.length > 0) {
             articles.forEach(article => {
-                article.classList.toggle('active', 
+                article.classList.toggle(
+                    'active',
                     article.getAttribute('data-category') === category
                 );
             });
             
             navLinks.forEach(link => {
-                link.classList.toggle('active',
+                link.classList.toggle(
+                    'active',
                     link.getAttribute('data-category') === category
                 );
             });
         }
     };
 
-////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////
+    // ============================================
+    // FIXED SMOOTH SCROLL LOGIC (WORKS FOR SECTION 1)
+    // ============================================
+    function calculateScrollPosition(targetElement) {
+        const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+        const elementTop = targetElement.getBoundingClientRect().top + window.pageYOffset;
 
+        // Prevent overscroll for Section 1
+        let yOffset = elementTop - headerHeight - 10;
+        if (yOffset < 0) yOffset = 0;
 
-    
-    // Smooth scroll to section on page load if hash exists
-window.addEventListener('DOMContentLoaded', function() {
-    // Check if there's a hash in the URL
-    if (window.location.hash) {
-        // Remove the # from the hash
-        const targetId = window.location.hash.substring(1);
-        const targetElement = document.getElementById(targetId);
-        
-        if (targetElement) {
-            // Small delay to ensure page is fully loaded
-            setTimeout(function() {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }, 100);
-        }
+        return yOffset;
     }
-});
 
-// Optional: Add smooth scrolling for all anchor links within the same page
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('href').substring(1);
+    // ============================================
+    // SMOOTH SCROLL ON PAGE LOAD
+    // ============================================
+    function smoothScrollToHash() {
+        const hash = window.location.hash;
+        if (!hash) return;
+
+        const targetId = hash.replace('#', '');
         const targetElement = document.getElementById(targetId);
-        
-        if (targetElement) {
-            targetElement.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+        if (!targetElement) return;
+
+        const yOffset = calculateScrollPosition(targetElement);
+
+        setTimeout(() => {
+            window.scrollTo({
+                top: yOffset,
+                behavior: 'smooth'
             });
-        }
+        }, 200);
+    }
+
+    setTimeout(smoothScrollToHash, 150);
+    window.addEventListener('hashchange', smoothScrollToHash);
+
+    // ============================================
+    // SMOOTH SCROLL FOR INTERNAL LINKS
+    // ============================================
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const targetId = this.getAttribute('href').replace('#', '');
+            const targetElement = document.getElementById(targetId);
+            if (!targetElement) return;
+
+            const yOffset = calculateScrollPosition(targetElement);
+
+            window.scrollTo({
+                top: yOffset,
+                behavior: 'smooth'
+            });
+
+            history.pushState(null, null, `#${targetId}`);
+        });
     });
-});
-
-
-////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
 
     // Initialize blog articles if present
     if (document.querySelector('.blog-article')) {

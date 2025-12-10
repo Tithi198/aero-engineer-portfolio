@@ -79,7 +79,7 @@ header {
     color: #007bff;
     font-size: 1.8rem;
     font-weight: 700;
-    text-transform: uppercase;
+    text-transform: sentence-case;
 }
 
 nav ul {
@@ -282,6 +282,8 @@ nav ul li a:hover {
         font-size: 1.3rem;
     }
 }
+
+
 /* Hero Section */
 .hero-section {
     position: relative;
@@ -309,6 +311,7 @@ nav ul li a:hover {
     align-items: center;
     min-height: 70vh;
 }
+
 
 .text-container {
     animation: slideInLeft 1s ease-out;
